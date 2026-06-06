@@ -20,7 +20,7 @@ export const ProjectModal = ({ isOpen, onClose, project, lang }: ProjectModalPro
     if (!isOpen || !project) return null;
 
     const isVi = lang === 'vi';
-    
+
     const labels = {
         title: isVi ? "Chi tiết dự án" : "Project Details",
         location: isVi ? "Địa điểm" : "Location",
@@ -39,9 +39,9 @@ export const ProjectModal = ({ isOpen, onClose, project, lang }: ProjectModalPro
 
     return (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={onClose}>
-            <div 
+            <div
                 className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl animate-in fade-in zoom-in-95 duration-200"
-                onClick={(e) => e.stopPropagation()} 
+                onClick={(e) => e.stopPropagation()}
                 onPointerDown={(e) => e.stopPropagation()}
             >
                 {/* Header */}
@@ -100,7 +100,7 @@ export const ProjectModal = ({ isOpen, onClose, project, lang }: ProjectModalPro
 
                 {/* Footer */}
                 <div className="p-4 border-t border-gray-100 bg-gray-50 flex justify-end shrink-0">
-                    <button 
+                    <button
                         onClick={onClose}
                         className="px-6 py-2 bg-[#5C3A21] hover:bg-[#8A5A35] text-white font-medium rounded-lg transition-colors"
                     >
