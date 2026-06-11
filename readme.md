@@ -1,6 +1,34 @@
 docker pull ghcr.io/trungthanhbmtran/ebook:latest
 docker run -d --name ebook-app -p 3000:3000 --restart unless-stopped ghcr.io/trungthanhbmtran/ebook:latest
 
+---
+
+## 🔄 Cập nhật image mới trên VPS (Pull & Deploy)
+
+Chạy lần lượt các lệnh sau mỗi khi có bản cập nhật mới:
+
+```bash
+# Bước 1: Kéo image mới nhất từ GitHub Container Registry
+docker pull ghcr.io/trungthanhbmtran/ebook:latest
+
+# Bước 2: Dừng và xóa container đang chạy
+docker stop ebook-app
+docker rm ebook-app
+
+# Bước 3: Khởi động container mới từ image vừa pull
+docker run -d --name ebook-app -p 3000:3000 --restart unless-stopped ghcr.io/trungthanhbmtran/ebook:latest
+
+# Bước 4: Xóa các image cũ không còn dùng để giải phóng ổ đĩa
+docker image prune -f
+```
+
+> **Gộp 1 lệnh duy nhất (tiện hơn):**
+> ```bash
+> docker pull ghcr.io/trungthanhbmtran/ebook:latest && docker stop ebook-app && docker rm ebook-app && docker run -d --name ebook-app -p 3000:3000 --restart unless-stopped ghcr.io/trungthanhbmtran/ebook:latest && docker image prune -f
+> ```
+
+---
+
 
 Bước 1: Cài đặt Nginx
 Dán lệnh này vào VPS để tải và cài đặt Nginx:
