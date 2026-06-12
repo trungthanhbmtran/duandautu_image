@@ -34,3 +34,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Excel files
+Phụ lục 2, Danh mục dự án thu hút đầu tư giai đoạn 2026 (219 dự án).xlsx
+rasoat_hatang.xlsx
