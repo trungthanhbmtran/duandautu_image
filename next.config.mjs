@@ -1,8 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // output: 'standalone',
+  output: 'standalone',
   // Thêm các cấu hình Next.js khác nếu cần
-  allowedDevOrigins: ['14.174.183.97'],
+  // allowedDevOrigins: ['14.174.183.97'],
   images: {
     formats: ['image/avif', 'image/webp'],
     minimumCacheTTL: 31536000, // cache 1 năm
