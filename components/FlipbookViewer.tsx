@@ -98,10 +98,13 @@ export default function FlipbookViewer() {
                 currentIndex++;
             }
 
-            macroGroupsMenu.push({
-                name: folder.name,
-                pageIndex: currentIndex
-            });
+            // Không hiển thị "0 MỤC LỤC DỰ ÁN" lên thẻ đánh dấu (Macro Tab)
+            if (!folder.name.toUpperCase().includes("0 MỤC LỤC") && !folder.name.toUpperCase().includes("0 MUC LUC")) {
+                macroGroupsMenu.push({
+                    name: folder.name,
+                    pageIndex: currentIndex
+                });
+            }
 
             folder.pages.forEach((pageUrl, pageIdx) => {
                 const isPdf = pageUrl.toLowerCase().endsWith('.pdf');
