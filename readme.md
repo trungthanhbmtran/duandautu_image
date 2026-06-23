@@ -16,8 +16,8 @@ git pull origin main
 ## 🐳 Cập nhật image mới qua Docker
 
 ```bash
-docker pull ghcr.io/trungthanhbmtran/duandautu_image:latest
-docker run -d --name duandautu-app -p 3000:3000 --restart unless-stopped ghcr.io/trungthanhbmtran/duandautu_image:latest
+docker pull ghcr.io/trungthanhbmtran/duandautu_image:latest && (docker stop ebook-app || true) && (docker rm ebook-app || true) && (docker stop duandautu-app || true) && (docker rm duandautu-app || true) && docker run -d --name duandautu-app -p 3000:3000 --restart unless-stopped ghcr.io/trungthanhbmtran/duandautu_image:latest && docker image prune -f
+
 ```
 
 ---
