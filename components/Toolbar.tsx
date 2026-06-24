@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import { useScreenSize } from "../hooks/useScreenSize";
 import {
     ZoomIn, ZoomOut, Maximize, Minimize, Volume2, VolumeX,
@@ -23,7 +23,7 @@ interface ToolbarProps {
     onLanguageToggle?: (lang: 'vi' | 'en') => void;
 }
 
-export default function Toolbar({
+const Toolbar = memo(function Toolbar({
     inputPage, totalPages, zoom, soundEnabled, isFullscreen,
     setInputPage, handlePageInput, goToPage, bookRef, setZoom, setSoundEnabled, toggleFullscreen,
     isDesktop, mobileLang, onLanguageToggle
@@ -81,4 +81,6 @@ export default function Toolbar({
             </div>
         </div>
     );
-}
+});
+
+export default Toolbar;

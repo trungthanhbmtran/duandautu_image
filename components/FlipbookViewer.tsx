@@ -6,13 +6,14 @@ import HTMLFlipBook from "react-pageflip";
 import Image from "next/image";
 import Toolbar from "./Toolbar";
 import { ChevronLeft, ChevronRight, Search, ZoomIn, ZoomOut } from "lucide-react";
-import { FlipbookContext, LazyPageContent } from "./LazyPageContent";
+import { flipbookStore, LazyPageContent } from "./LazyPageContent";
 
 import { Cover } from "./book/Cover";
 import { BackCover } from "./book/BackCover";
 import { PdfPage } from "./book/PdfPage";
 import { useScreenSize } from '../hooks/useScreenSize';
 import MacroTab from './MacroTab';
+import NatureBackground from './NatureBackground';
 
 interface MacroFolder {
     name: string;
@@ -93,7 +94,7 @@ export default function FlipbookViewer() {
             // và trang tiếp theo (trang nội dung) nằm ở mặt PHẢI (index chẵn)
             if (isDesktop && currentIndex % 2 === 0) {
                 bookPagesToRender.push(
-                    <div key={`blank-folder-pad-${currentIndex}`} className="page-light bg-white w-full h-full shadow-[inset_-10px_0_20px_rgba(0,0,0,0.05)]"></div>
+                    <div key={`blank-folder-pad-${currentIndex}`} className="page-light bg-white w-full h-full bg-gradient-to-l from-black/5 to-transparent"></div>
                 );
                 currentIndex++;
             }
@@ -119,9 +120,9 @@ export default function FlipbookViewer() {
                         {isDesktop && (
                             <>
                                 {isLeftPage ? (
-                                    <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-black/10 to-transparent pointer-events-none z-30 mix-blend-multiply"></div>
+                                    <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-black/10 to-transparent pointer-events-none z-30"></div>
                                 ) : (
-                                    <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-black/10 to-transparent pointer-events-none z-30 mix-blend-multiply"></div>
+                                    <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-black/10 to-transparent pointer-events-none z-30"></div>
                                 )}
                             </>
                         )}
@@ -155,7 +156,7 @@ export default function FlipbookViewer() {
             // Để khi chèn bìa sau vào, tổng số trang là chẵn, bìa sau sẽ nằm ở mặt trái của tờ cuối cùng
             while (bookPagesToRender.length % 2 === 0) {
                 bookPagesToRender.push(
-                    <div key={`blank-${bookPagesToRender.length}`} className="page-light bg-white w-full h-full shadow-[inset_-10px_0_20px_rgba(0,0,0,0.05)]"></div>
+                    <div key={`blank-${bookPagesToRender.length}`} className="page-light bg-white w-full h-full bg-gradient-to-l from-black/5 to-transparent"></div>
                 );
             }
         }
@@ -216,7 +217,10 @@ export default function FlipbookViewer() {
                 setInputPage(rightPage >= totalPages ? `${leftPage}` : `${leftPage}-${rightPage}`);
             }
         }
-    }, [currentPage, totalPages, isReady, isDesktop]);
+
+        // Tối ưu hóa thuật toán O(1): Cập nhật store thay vì truyền qua Context
+        flipbookStore.setState({ currentPage, targetPage, isDesktop });
+    }, [currentPage, targetPage, isDesktop, totalPages, isReady]);
 
     const goToPage = useCallback((pageIndex: number) => {
         if (bookRef.current?.pageFlip()) {
@@ -274,17 +278,10 @@ export default function FlipbookViewer() {
     }
 
     return (
-        <FlipbookContext.Provider value={{ currentPage, targetPage, isDesktop }}>
+        <>
             <div ref={containerRef} className="flex flex-col h-[100dvh] w-full font-sans overflow-hidden select-none relative back print:block print:h-auto print:overflow-visible print:w-full">
-                <div className="absolute inset-0 z-0 flex flex-col md:flex-row pointer-events-none print:hidden">
-                    <div className="relative w-full md:w-1/2 h-full opacity-100 sepia-[20%] transform-gpu">
-                        <Image src="/nga-6-buon-ma-thuot-guong-mat-thuong-hieu-cua-thanh-pho-vung-cao-06-1652171304.jpg" alt="Buôn Ma Thuột Bg" fill sizes="(max-width: 768px) 100vw, 50vw" priority quality={75} className="object-cover" />
-                    </div>
-                    {isDesktop && (
-                        <div className="relative w-full md:w-1/2 h-full opacity-100 sepia-[20%] transform-gpu">
-                            <Image src="/depositphotos659116602xl-1715649541611.jpg" alt="Nghinh Phong Bg" fill sizes="50vw" priority quality={75} className="object-cover" />
-                        </div>
-                    )}
+                <div className="absolute inset-0 z-0 pointer-events-none print:hidden">
+                    <NatureBackground />
                 </div>
 
                 <audio ref={audioRef} src="https://www.soundjay.com/misc/sounds/page-flip-01a.mp3" preload="auto" />
@@ -292,13 +289,13 @@ export default function FlipbookViewer() {
                 <div ref={bookAreaRef} className={`flex-1 w-full flex items-center justify-center relative z-10 print:hidden ${zoom > 1 ? 'overflow-auto' : 'overflow-hidden'}`}>
                     {isDesktop && (
                         <>
-                            <button onClick={() => bookRef.current?.pageFlip()?.flipPrev()} className="fixed left-3 top-1/2 -translate-y-1/2 z-50 p-3 bg-[rgba(0,0,0,0.4)] hover:bg-[rgba(0,0,0,0.7)] text-white rounded-full backdrop-blur transition-all hidden sm:flex"><ChevronLeft size={28} /></button>
-                            <button onClick={() => bookRef.current?.pageFlip()?.flipNext()} className="fixed right-3 top-1/2 -translate-y-1/2 z-50 p-3 bg-[rgba(0,0,0,0.4)] hover:bg-[rgba(0,0,0,0.7)] text-white rounded-full backdrop-blur transition-all hidden sm:flex"><ChevronRight size={28} /></button>
+                            <button onClick={() => bookRef.current?.pageFlip()?.flipPrev()} className="fixed left-3 top-1/2 -translate-y-1/2 z-50 p-3 bg-[rgba(0,0,0,0.4)] hover:bg-[rgba(0,0,0,0.7)] text-white rounded-full transition-opacity hidden sm:flex"><ChevronLeft size={28} /></button>
+                            <button onClick={() => bookRef.current?.pageFlip()?.flipNext()} className="fixed right-3 top-1/2 -translate-y-1/2 z-50 p-3 bg-[rgba(0,0,0,0.4)] hover:bg-[rgba(0,0,0,0.7)] text-white rounded-full transition-opacity hidden sm:flex"><ChevronRight size={28} /></button>
                         </>
                     )}
 
                     <div
-                        className={`transition-all duration-500 ${isReady ? 'opacity-100' : 'opacity-0 pointer-events-none'} ${zoom > 1 ? 'flex-none' : 'flex items-center justify-center'}`}
+                        className={`transition-opacity duration-500 ${isReady ? 'opacity-100' : 'opacity-0 pointer-events-none'} ${zoom > 1 ? 'flex-none' : 'flex items-center justify-center'}`}
                         style={zoom > 1 ? {
                             width: (isDesktop ? 1126 : 563) * zoom * baseScale,
                             height: 756 * zoom * baseScale
@@ -343,6 +340,6 @@ export default function FlipbookViewer() {
                     isDesktop={isDesktop}
                 />
             </div>
-        </FlipbookContext.Provider>
+        </>
     );
 }

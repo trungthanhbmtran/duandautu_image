@@ -1,15 +1,51 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 
-export const FlipbookContext = createContext({ currentPage: 0, targetPage: 0, isDesktop: true });
+// Tối ưu hóa thuật toán: Sử dụng Event Emitter (Pub/Sub) thay vì React Context
+// để tránh hiện tượng O(N) re-render (cả 100 trang cùng re-render khi lật 1 trang).
+// Chỉ những trang thực sự thay đổi trạng thái mới bị render lại.
+type FlipState = { currentPage: number, targetPage: number, isDesktop: boolean };
 
-export const LazyPageContent = ({ pageIndex, alwaysRender = false, children }: { pageIndex: number, alwaysRender?: boolean, children: React.ReactNode }) => {
-    const { currentPage, targetPage, isDesktop } = useContext(FlipbookContext);
-    
-    // Tải trước số lượng trang tùy theo thiết bị để tránh treo máy.
-    // Điện thoại (isDesktop=false) có RAM và VRAM rất yếu, nếu tải 14 trang sẽ gây treo (crash) app khi vuốt lật.
-    // Giảm xuống tải trước 2 trang (1 tờ) cho mobile, và 6 trang (3 tờ) cho máy tính.
-    const preloadDistance = isDesktop ? 6 : 2;
-    const isVisible = alwaysRender || Math.abs(currentPage - pageIndex) <= preloadDistance || Math.abs(targetPage - pageIndex) <= preloadDistance;
+class FlipbookStore {
+    private state: FlipState = { currentPage: 0, targetPage: 0, isDesktop: true };
+    private listeners: Set<() => void> = new Set();
+
+    getState() { return this.state; }
+
+    setState(newState: Partial<FlipState>) {
+        this.state = { ...this.state, ...newState };
+        this.listeners.forEach(listener => listener());
+    }
+
+    subscribe(listener: () => void) {
+        this.listeners.add(listener);
+        return () => {
+            this.listeners.delete(listener);
+        };
+    }
+}
+
+export const flipbookStore = new FlipbookStore();
+
+export const LazyPageContent = memo(({ pageIndex, alwaysRender = false, children }: { pageIndex: number, alwaysRender?: boolean, children: React.ReactNode }) => {
+    const [isVisible, setIsVisible] = useState(alwaysRender);
+
+    useEffect(() => {
+        if (alwaysRender) return;
+
+        const checkVisibility = () => {
+            const { currentPage, targetPage, isDesktop } = flipbookStore.getState();
+            const preloadDistance = isDesktop ? 6 : 2;
+            const newIsVisible = Math.abs(currentPage - pageIndex) <= preloadDistance || Math.abs(targetPage - pageIndex) <= preloadDistance;
+
+            setIsVisible(prev => {
+                if (prev !== newIsVisible) return newIsVisible;
+                return prev;
+            });
+        };
+
+        checkVisibility();
+        return flipbookStore.subscribe(checkVisibility);
+    }, [pageIndex, alwaysRender]);
 
     if (!isVisible) {
         return (
@@ -21,4 +57,5 @@ export const LazyPageContent = ({ pageIndex, alwaysRender = false, children }: {
     }
 
     return <>{children}</>;
-};
+});
+LazyPageContent.displayName = 'LazyPageContent';

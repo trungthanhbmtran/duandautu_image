@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 
 interface MacroTabProps {
     menu: any;
@@ -18,7 +18,7 @@ const MACRO_COLORS = [
     { bg: "bg-[#1E2D24]", hoverBg: "hover:bg-[#2A4032]", border: "border-[#68D391]", text: "text-[#68D391]" }, // Green
 ];
 
-export default function MacroTab({ menu, mIdx, currentPage, side, onTabClick, onTabHover }: MacroTabProps) {
+const MacroTab = memo(function MacroTab({ menu, mIdx, currentPage, side, onTabClick, onTabHover }: MacroTabProps) {
     const isLeftTab = side === "left";
     const shouldRender = isLeftTab ? currentPage >= menu.pageIndex : currentPage < menu.pageIndex;
     const color = MACRO_COLORS[mIdx % MACRO_COLORS.length];
@@ -57,4 +57,6 @@ export default function MacroTab({ menu, mIdx, currentPage, side, onTabClick, on
             </span>
         </button>
     );
-}
+});
+
+export default MacroTab;
